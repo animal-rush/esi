@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نمودار ارز زنده - دقیقه‌ای</title>
+    <title>نمودار ارز زنده</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -60,7 +60,7 @@
         const dataPoints = [];
 
         // شروع قیمت اولیه
-        let currentPrice = 0;
+        let currentPrice = 1000; // قیمت ابتدایی
 
         // بررسی اینکه آیا داده‌ها از قبل ذخیره شده‌اند یا خیر
         if (localStorage.getItem('currencyData')) {
@@ -76,7 +76,14 @@
 
         // تابع تصادفی برای تغییرات قیمت (در هر دقیقه تغییرات کوچک و بزرگ ایجاد می‌شود)
         const randomChange = () => {
-            return (Math.random() * 100) + 50;  // بیشتر تغییرات افزایشی
+            const direction = Math.random() > 0.5 ? 1 : -1; // تصادفی برای افزایش یا کاهش
+            const magnitude = Math.random() * 10 + 5;  // تغییرات کوچک
+            return direction * magnitude; 
+        };
+
+        // شبیه‌سازی تغییرات با رنگ‌های سبز و قرمز
+        const getColorForChange = (change) => {
+            return change >= 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
         };
 
         // نمودار اصلی
@@ -90,7 +97,12 @@
                     fill: false,
                     borderColor: '#4bc0c0',
                     borderWidth: 3,
-                    pointBackgroundColor: '#4bc0c0',
+                    pointBackgroundColor: (context) => {
+                        const index = context.dataIndex;
+                        const value = context.dataset.data[index];
+                        const prevValue = index > 0 ? context.dataset.data[index - 1] : value;
+                        return value >= prevValue ? '#4bc0c0' : '#ff6384'; // سبز برای افزایش و قرمز برای کاهش
+                    },
                     pointBorderColor: '#fff',
                     pointRadius: 5,
                     tension: 0.3,
@@ -170,7 +182,7 @@
         setInterval(() => {
             // قیمت جدید را محاسبه و به نمودار اضافه می‌کنیم
             const change = randomChange(); // تغییر قیمت با تصادفی
-            currentPrice += change;  // افزایش قیمت
+            currentPrice += change;  // افزایش یا کاهش قیمت
 
             // افزودن قیمت جدید و تغییرات
             labels.push(`دقیقه ${labels.length + 1}`);
