@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نمودار ارز زنده</title>
+    <title>نمودار قیمت ارز</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f4f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,10 +20,9 @@
             max-width: 900px;
             background-color: #fff;
             border-radius: 15px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
-            border-top: 10px solid #4bc0c0;
         }
         canvas {
             width: 100% !important;
@@ -31,62 +30,50 @@
         }
         h2 {
             color: #333;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: 2rem;
             font-weight: bold;
         }
         .chart-title {
             font-size: 18px;
             color: #777;
-            margin-bottom: 30px;
-        }
-        .chart-description {
-            font-size: 14px;
-            color: #999;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="chart-container">
-        <h2>نمودار تغییرات ارز</h2>
-        <div class="chart-title">نمودار تغییرات قیمت ارز به‌صورت زنده</div>
-        <div class="chart-description">این نمودار به‌طور زنده تغییرات قیمت ارز را نمایش می‌دهد.</div>
+        <h2>نمودار تغییرات قیمت ارز</h2>
+        <div class="chart-title">این نمودار به‌طور زنده تغییرات قیمت ارز را نمایش می‌دهد.</div>
         <canvas id="currencyChart"></canvas>
     </div>
 
     <script>
         const ctx = document.getElementById('currencyChart').getContext('2d');
-        const labels = [];
-        const dataPoints = [];
+        let currentPrice = 1000; // قیمت شروع
+        const labels = ['دقیقه 1'];
+        const dataPoints = [currentPrice];
 
-        // شروع قیمت اولیه
-        let currentPrice = 1000; // قیمت ابتدایی
-
-        // بررسی اینکه آیا داده‌ها از قبل ذخیره شده‌اند یا خیر
+        // داده‌های قبلی اگر موجود باشد از localStorage بارگیری می‌شود
         if (localStorage.getItem('currencyData')) {
             const savedData = JSON.parse(localStorage.getItem('currencyData'));
             currentPrice = savedData.currentPrice;
             labels.push(...savedData.labels);
             dataPoints.push(...savedData.dataPoints);
-        } else {
-            // اضافه کردن اولین قیمت و روز
-            labels.push('دقیقه 1');
-            dataPoints.push(currentPrice);
         }
 
-        // تابع تصادفی برای تغییرات قیمت (در هر دقیقه تغییرات کوچک و بزرگ ایجاد می‌شود)
+        // تغییرات قیمت به صورت تصادفی
         const randomChange = () => {
-            const direction = Math.random() > 0.5 ? 1 : -1; // تصادفی برای افزایش یا کاهش
-            const magnitude = Math.random() * 10 + 5;  // تغییرات کوچک
-            return direction * magnitude; 
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const magnitude = Math.random() * 10 + 5;
+            return direction * magnitude;
         };
 
-        // شبیه‌سازی تغییرات با رنگ‌های سبز و قرمز
+        // رنگ سبز برای افزایش و قرمز برای کاهش قیمت
         const getColorForChange = (change) => {
             return change >= 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
         };
 
-        // نمودار اصلی
+        // ایجاد نمودار با استفاده از Chart.js
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -101,7 +88,7 @@
                         const index = context.dataIndex;
                         const value = context.dataset.data[index];
                         const prevValue = index > 0 ? context.dataset.data[index - 1] : value;
-                        return value >= prevValue ? '#4bc0c0' : '#ff6384'; // سبز برای افزایش و قرمز برای کاهش
+                        return value >= prevValue ? '#4bc0c0' : '#ff6384';
                     },
                     pointBorderColor: '#fff',
                     pointRadius: 5,
@@ -115,10 +102,7 @@
                     title: {
                         display: true,
                         text: 'تغییرات قیمت ارز در دقیقه‌های اخیر',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
+                        font: { size: 18, weight: 'bold' },
                         color: '#333'
                     },
                     tooltip: {
@@ -138,18 +122,11 @@
                             display: true,
                             text: 'دقیقه',
                             color: '#777',
-                            font: {
-                                size: 14
-                            }
+                            font: { size: 14 }
                         },
-                        grid: {
-                            display: false
-                        },
+                        grid: { display: false },
                         ticks: {
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            },
+                            font: { size: 12, weight: 'bold' },
                             color: '#888'
                         }
                     },
@@ -158,19 +135,12 @@
                             display: true,
                             text: 'قیمت (تومان)',
                             color: '#777',
-                            font: {
-                                size: 14
-                            }
+                            font: { size: 14 }
                         },
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(200, 200, 200, 0.3)',
-                        },
+                        grid: { color: 'rgba(200, 200, 200, 0.3)' },
                         ticks: {
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            },
+                            font: { size: 12, weight: 'bold' },
                             color: '#888'
                         }
                     }
@@ -178,17 +148,16 @@
             }
         });
 
-        // به‌روزرسانی قیمت هر 1 دقیقه
+        // به‌روزرسانی قیمت‌ها هر 1 دقیقه
         setInterval(() => {
-            // قیمت جدید را محاسبه و به نمودار اضافه می‌کنیم
-            const change = randomChange(); // تغییر قیمت با تصادفی
-            currentPrice += change;  // افزایش یا کاهش قیمت
+            const change = randomChange();
+            currentPrice += change;
 
-            // افزودن قیمت جدید و تغییرات
+            // افزودن داده جدید به نمودار
             labels.push(`دقیقه ${labels.length + 1}`);
             dataPoints.push(currentPrice);
 
-            // حذف اولین عنصر (برای اینکه نمودار همیشه 30 دقیقه اخیر را نشان دهد)
+            // محدود کردن تعداد داده‌ها به 30 دقیقه
             if (labels.length > 30) {
                 labels.shift();
                 dataPoints.shift();
@@ -197,13 +166,13 @@
             // به‌روزرسانی نمودار
             chart.update();
 
-            // ذخیره داده‌ها در Local Storage
+            // ذخیره داده‌ها در localStorage
             localStorage.setItem('currencyData', JSON.stringify({
                 currentPrice,
                 labels,
                 dataPoints
             }));
-        }, 60000);  // هر 1 دقیقه قیمت به‌روزرسانی می‌شود
+        }, 60000); // هر 1 دقیقه به‌روزرسانی می‌شود
     </script>
 </body>
 </html>
