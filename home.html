@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نمودار ارزی فیک</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chart-container {
+            width: 80%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h2 style="text-align: center; margin-bottom: 20px; color: #333;">نمودار تغییرات ارز</h2>
+        <canvas id="currencyChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('currencyChart').getContext('2d');
+        const labels = [];
+        const dataPoints = [];
+
+        // ایجاد نوسانات فیک قیمت ارز در بازه زمانی
+        let currentPrice = 10000;
+        for (let i = 0; i < 50; i++) {
+            labels.push(`Day ${i + 1}`);
+            currentPrice += Math.floor(Math.random() * (100) - 50); // تغییرات قیمت به صورت تصادفی
+            dataPoints.push(currentPrice);
+        }
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'قیمت ارز',
+                    data: dataPoints,
+                    fill: false,
+                    borderColor: '#4bc0c0',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4bc0c0',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'تغییرات قیمت ارز در روزهای اخیر',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#333'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return 'قیمت: ' + tooltipItem.raw.toLocaleString() + ' تومان';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'روز'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'قیمت (تومان)'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
