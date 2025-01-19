@@ -60,14 +60,24 @@
         const dataPoints = [];
 
         // شروع قیمت اولیه
-        let currentPrice = 10000;
+        let currentPrice = 0;
+
+        // بررسی اینکه آیا داده‌ها از قبل ذخیره شده‌اند یا خیر
+        if (localStorage.getItem('currencyData')) {
+            const savedData = JSON.parse(localStorage.getItem('currencyData'));
+            currentPrice = savedData.currentPrice;
+            labels.push(...savedData.labels);
+            dataPoints.push(...savedData.dataPoints);
+        } else {
+            // اضافه کردن اولین قیمت و روز
+            labels.push('دقیقه 1');
+            dataPoints.push(currentPrice);
+        }
 
         // تابع تصادفی برای تغییرات قیمت (در هر دقیقه تغییرات کوچک و بزرگ ایجاد می‌شود)
-        const randomChange = () => Math.random() * 200 - 100;  // تغییرات تصادفی در حدود 100+ یا 100-
-
-        // اضافه کردن اولین قیمت و روز
-        labels.push('دقیقه 1');
-        dataPoints.push(currentPrice);
+        const randomChange = () => {
+            return (Math.random() * 100) + 50;  // بیشتر تغییرات افزایشی
+        };
 
         // نمودار اصلی
         const chart = new Chart(ctx, {
@@ -140,7 +150,7 @@
                                 size: 14
                             }
                         },
-                        beginAtZero: false,
+                        beginAtZero: true,
                         grid: {
                             color: 'rgba(200, 200, 200, 0.3)',
                         },
@@ -159,7 +169,10 @@
         // به‌روزرسانی قیمت هر 1 دقیقه
         setInterval(() => {
             // قیمت جدید را محاسبه و به نمودار اضافه می‌کنیم
-            currentPrice += randomChange(); // تغییر قیمت با تصادفی
+            const change = randomChange(); // تغییر قیمت با تصادفی
+            currentPrice += change;  // افزایش قیمت
+
+            // افزودن قیمت جدید و تغییرات
             labels.push(`دقیقه ${labels.length + 1}`);
             dataPoints.push(currentPrice);
 
@@ -171,6 +184,13 @@
 
             // به‌روزرسانی نمودار
             chart.update();
+
+            // ذخیره داده‌ها در Local Storage
+            localStorage.setItem('currencyData', JSON.stringify({
+                currentPrice,
+                labels,
+                dataPoints
+            }));
         }, 60000);  // هر 1 دقیقه قیمت به‌روزرسانی می‌شود
     </script>
 </body>
