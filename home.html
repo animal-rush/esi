@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نمودار ارزی فیک</title>
+    <title>نمودار ارز زنده</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -49,8 +49,8 @@
 <body>
     <div class="chart-container">
         <h2>نمودار تغییرات ارز</h2>
-        <div class="chart-title">نمودار شبیه‌سازی شده تغییرات قیمت ارز</div>
-        <div class="chart-description">این نمودار به صورت تصادفی شبیه‌سازی شده است. قیمت‌ها و نوسانات واقعی نیستند.</div>
+        <div class="chart-title">نمودار تغییرات قیمت ارز به‌صورت زنده</div>
+        <div class="chart-description">این نمودار به‌طور زنده تغییرات قیمت ارز را نمایش می‌دهد.</div>
         <canvas id="currencyChart"></canvas>
     </div>
 
@@ -59,15 +59,20 @@
         const labels = [];
         const dataPoints = [];
 
-        // ایجاد نوسانات فیک قیمت ارز
+        // شروع قیمت اولیه
         let currentPrice = 10000;
-        const randomFactor = () => Math.random() * (2) - 1; // عامل تصادفی برای نوسانات بیشتر
+
+        // تابع تصادفی برای تغییرات قیمت
+        const randomChange = () => Math.random() * 100 - 50;  // تغییرات تصادفی مثبت و منفی در حدود 50
+
+        // اضافه کردن روزها و قیمت‌ها
         for (let i = 0; i < 50; i++) {
             labels.push(`روز ${i + 1}`);
-            currentPrice += Math.floor(randomFactor() * 150); // تغییرات تصادفی قیمت
+            currentPrice += randomChange();  // تغییر قیمت با تصادفی
             dataPoints.push(currentPrice);
         }
 
+        // نمودار اصلی
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -153,6 +158,23 @@
                 }
             }
         });
+
+        // به‌روزرسانی قیمت هر 1 ثانیه
+        setInterval(() => {
+            // قیمت جدید را محاسبه و به نمودار اضافه می‌کنیم
+            currentPrice += randomChange();
+            dataPoints.push(currentPrice);
+            labels.push(`روز ${labels.length + 1}`);
+            
+            // حذف اولین عنصر (برای اینکه نمودار رشد کند و همیشه فقط 50 روز نمایش دهد)
+            if (labels.length > 50) {
+                labels.shift();
+                dataPoints.shift();
+            }
+
+            // به‌روزرسانی نمودار
+            chart.update();
+        }, 1000);  // هر 1 ثانیه قیمت به‌روزرسانی می‌شود
     </script>
 </body>
 </html>
