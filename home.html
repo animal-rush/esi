@@ -8,29 +8,49 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            background-color: #f0f4f8;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
         .chart-container {
             width: 80%;
-            max-width: 800px;
+            max-width: 900px;
             background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 10px solid #4bc0c0;
         }
         canvas {
             width: 100% !important;
-            height: 400px !important;
+            height: 500px !important;
+        }
+        h2 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .chart-title {
+            font-size: 18px;
+            color: #777;
+            margin-bottom: 30px;
+        }
+        .chart-description {
+            font-size: 14px;
+            color: #999;
         }
     </style>
 </head>
 <body>
     <div class="chart-container">
-        <h2 style="text-align: center; margin-bottom: 20px; color: #333;">نمودار تغییرات ارز</h2>
+        <h2>نمودار تغییرات ارز</h2>
+        <div class="chart-title">نمودار شبیه‌سازی شده تغییرات قیمت ارز</div>
+        <div class="chart-description">این نمودار به صورت تصادفی شبیه‌سازی شده است. قیمت‌ها و نوسانات واقعی نیستند.</div>
         <canvas id="currencyChart"></canvas>
     </div>
 
@@ -39,11 +59,12 @@
         const labels = [];
         const dataPoints = [];
 
-        // ایجاد نوسانات فیک قیمت ارز در بازه زمانی
+        // ایجاد نوسانات فیک قیمت ارز
         let currentPrice = 10000;
+        const randomFactor = () => Math.random() * (2) - 1; // عامل تصادفی برای نوسانات بیشتر
         for (let i = 0; i < 50; i++) {
-            labels.push(`Day ${i + 1}`);
-            currentPrice += Math.floor(Math.random() * (100) - 50); // تغییرات قیمت به صورت تصادفی
+            labels.push(`روز ${i + 1}`);
+            currentPrice += Math.floor(randomFactor() * 150); // تغییرات تصادفی قیمت
             dataPoints.push(currentPrice);
         }
 
@@ -56,12 +77,12 @@
                     data: dataPoints,
                     fill: false,
                     borderColor: '#4bc0c0',
-                    tension: 0.1,
-                    borderWidth: 2,
+                    borderWidth: 3,
                     pointBackgroundColor: '#4bc0c0',
                     pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4
+                    pointRadius: 5,
+                    tension: 0.3,
+                    cubicInterpolationMode: 'monotone',
                 }]
             },
             options: {
@@ -71,12 +92,15 @@
                         display: true,
                         text: 'تغییرات قیمت ارز در روزهای اخیر',
                         font: {
-                            size: 16,
+                            size: 18,
                             weight: 'bold'
                         },
                         color: '#333'
                     },
                     tooltip: {
+                        backgroundColor: '#333',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
                         callbacks: {
                             label: function(tooltipItem) {
                                 return 'قیمت: ' + tooltipItem.raw.toLocaleString() + ' تومان';
@@ -88,15 +112,43 @@
                     x: {
                         title: {
                             display: true,
-                            text: 'روز'
+                            text: 'روز',
+                            color: '#777',
+                            font: {
+                                size: 14
+                            }
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            color: '#888'
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'قیمت (تومان)'
+                            text: 'قیمت (تومان)',
+                            color: '#777',
+                            font: {
+                                size: 14
+                            }
                         },
-                        beginAtZero: false
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.3)',
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            color: '#888'
+                        }
                     }
                 }
             }
