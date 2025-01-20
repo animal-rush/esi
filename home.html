@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نمودار قیمت ارز</title>
+    <title>نمودار ارز زنده</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f7fa;
+            background-color: #f0f4f8;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,9 +20,10 @@
             max-width: 900px;
             background-color: #fff;
             border-radius: 15px;
-            padding: 20px;
+            padding: 30px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
+            border-top: 10px solid #4bc0c0;
         }
         canvas {
             width: 100% !important;
@@ -30,50 +31,62 @@
         }
         h2 {
             color: #333;
-            font-size: 2rem;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
             font-weight: bold;
         }
         .chart-title {
             font-size: 18px;
             color: #777;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-description {
+            font-size: 14px;
+            color: #999;
         }
     </style>
 </head>
 <body>
     <div class="chart-container">
-        <h2>نمودار تغییرات قیمت ارز</h2>
-        <div class="chart-title">این نمودار به‌طور زنده تغییرات قیمت ارز را نمایش می‌دهد.</div>
+        <h2>نمودار تغییرات ارز</h2>
+        <div class="chart-title">نمودار تغییرات قیمت ارز به‌صورت زنده</div>
+        <div class="chart-description">این نمودار به‌طور زنده تغییرات قیمت ارز را نمایش می‌دهد.</div>
         <canvas id="currencyChart"></canvas>
     </div>
 
     <script>
         const ctx = document.getElementById('currencyChart').getContext('2d');
-        let currentPrice = 1000; // قیمت شروع
-        const labels = ['دقیقه 1'];
-        const dataPoints = [currentPrice];
+        const labels = [];
+        const dataPoints = [];
 
-        // داده‌های قبلی اگر موجود باشد از localStorage بارگیری می‌شود
+        // شروع قیمت اولیه
+        let currentPrice = 1000; // قیمت ابتدایی
+
+        // بررسی اینکه آیا داده‌ها از قبل ذخیره شده‌اند یا خیر
         if (localStorage.getItem('currencyData')) {
             const savedData = JSON.parse(localStorage.getItem('currencyData'));
             currentPrice = savedData.currentPrice;
             labels.push(...savedData.labels);
             dataPoints.push(...savedData.dataPoints);
+        } else {
+            // اضافه کردن اولین قیمت و دقیقه
+            labels.push('دقیقه 1');
+            dataPoints.push(currentPrice);
         }
 
-        // تغییرات قیمت به صورت تصادفی
+        // تابع تصادفی برای تغییرات قیمت (در هر ثانیه تغییرات کوچک و بزرگ ایجاد می‌شود)
         const randomChange = () => {
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            const magnitude = Math.random() * 10 + 5;
-            return direction * magnitude;
+            const direction = Math.random() > 0.5 ? 1 : -1; // تصادفی برای افزایش یا کاهش
+            const magnitude = Math.random() * 10 + 2;  // تغییرات کوچک
+            return direction * magnitude; 
         };
 
-        // رنگ سبز برای افزایش و قرمز برای کاهش قیمت
+        // شبیه‌سازی تغییرات با رنگ‌های سبز و قرمز
         const getColorForChange = (change) => {
             return change >= 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
         };
 
-        // ایجاد نمودار با استفاده از Chart.js
+        // نمودار اصلی
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -88,11 +101,11 @@
                         const index = context.dataIndex;
                         const value = context.dataset.data[index];
                         const prevValue = index > 0 ? context.dataset.data[index - 1] : value;
-                        return value >= prevValue ? '#4bc0c0' : '#ff6384';
+                        return value >= prevValue ? '#4bc0c0' : '#ff6384'; // سبز برای افزایش و قرمز برای کاهش
                     },
                     pointBorderColor: '#fff',
                     pointRadius: 5,
-                    tension: 0.3,
+                    tension: 0.1,  // این مقدار برای صاف کردن نمودار است
                     cubicInterpolationMode: 'monotone',
                 }]
             },
@@ -101,8 +114,11 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'تغییرات قیمت ارز در دقیقه‌های اخیر',
-                        font: { size: 18, weight: 'bold' },
+                        text: 'تغییرات قیمت ارز در ثانیه‌های اخیر',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
                         color: '#333'
                     },
                     tooltip: {
@@ -122,11 +138,18 @@
                             display: true,
                             text: 'دقیقه',
                             color: '#777',
-                            font: { size: 14 }
+                            font: {
+                                size: 14
+                            }
                         },
-                        grid: { display: false },
+                        grid: {
+                            display: false
+                        },
                         ticks: {
-                            font: { size: 12, weight: 'bold' },
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
                             color: '#888'
                         }
                     },
@@ -135,12 +158,19 @@
                             display: true,
                             text: 'قیمت (تومان)',
                             color: '#777',
-                            font: { size: 14 }
+                            font: {
+                                size: 14
+                            }
                         },
                         beginAtZero: true,
-                        grid: { color: 'rgba(200, 200, 200, 0.3)' },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.3)',
+                        },
                         ticks: {
-                            font: { size: 12, weight: 'bold' },
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
                             color: '#888'
                         }
                     }
@@ -148,16 +178,17 @@
             }
         });
 
-        // به‌روزرسانی قیمت‌ها هر 1 دقیقه
+        // به‌روزرسانی قیمت هر 3 ثانیه
         setInterval(() => {
-            const change = randomChange();
-            currentPrice += change;
+            // قیمت جدید را محاسبه و به نمودار اضافه می‌کنیم
+            const change = randomChange(); // تغییر قیمت با تصادفی
+            currentPrice += change;  // افزایش یا کاهش قیمت
 
-            // افزودن داده جدید به نمودار
+            // افزودن قیمت جدید و تغییرات
             labels.push(`دقیقه ${labels.length + 1}`);
             dataPoints.push(currentPrice);
 
-            // محدود کردن تعداد داده‌ها به 30 دقیقه
+            // حذف اولین عنصر (برای اینکه نمودار همیشه 30 دقیقه اخیر را نشان دهد)
             if (labels.length > 30) {
                 labels.shift();
                 dataPoints.shift();
@@ -166,13 +197,13 @@
             // به‌روزرسانی نمودار
             chart.update();
 
-            // ذخیره داده‌ها در localStorage
+            // ذخیره داده‌ها در Local Storage
             localStorage.setItem('currencyData', JSON.stringify({
                 currentPrice,
                 labels,
                 dataPoints
             }));
-        }, 60000); // هر 1 دقیقه به‌روزرسانی می‌شود
+        }, 3000);  // هر 3 ثانیه قیمت به‌روزرسانی می‌شود
     </script>
 </body>
 </html>
